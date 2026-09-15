@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>이번 달 수행평가 달력 & 준비 시간 계산기</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Pretendard', 'Noto Sans KR', sans-serif;
+        }
+
+        body {
+            background-color: #f4f7f6;
+            color: #333;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        header h1 {
+            color: #2c3e50;
+            font-size: 28px;
+            margin-bottom: 8px;
+        }
+
+        header p {
+            color: #666;
+            font-size: 15px;
+        }
+
+        .main-layout {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .main-layout {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .card {
+            background: #fff;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+
+        /* 달력 스타일 */
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .calendar-header h2 {
+            font-size: 20px;
+            color: #34495e;
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 5px;
+            text-align: center;
+        }
+
+        .day-header {
+            font-weight: bold;
+            padding: 10px 0;
+            background-color: #f8f9fa;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        .day-header.sun { color: #e74c3c; }
+        .day-header.sat { color: #3498db; }
+
+        .day-cell {
+            min-height: 90px;
+            border: 1px solid #eee;
+            border-radius: 6px;
+            padding: 5px;
+            text-align: left;
+            background-color: #fff;
+            position: relative;
+        }
+
+        .day-cell .date-num {
+            font-size: 12px;
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #555;
+        }
+
+        .day-cell.other-month {
+            background-color: #fafafa;
+            opacity: 0.5;
+        }
+
+        .eval-badge {
+            background-color: #e8f5e9;
+            color: #2e7d32;
+            border-left: 3px solid #4caf50;
+            font-size: 11px;
+            padding: 3px 5px;
+            border-radius: 3px;
+            margin-bottom: 3px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            cursor: pointer;
+        }
+
+        .eval-badge.high-time {
+            background-color: #ffebee;
+            color: #c62828;
+            border-left-color: #f44336;
+        }
+
+        /* 사이드바 및 입력 폼 */
+        .form-group {
+            margin-bottom: 12px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 13px;
+            font-weight: bold;
+            margin-bottom: 4px;
+            color: #555;
+        }
+
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 8px 10px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        button.btn-add {
+            width: 100%;
+            padding: 10px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 15px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        button.btn-add:hover {
+            background-color: #2980b9;
+        }
+
+        /* 총 소요시간 요약 요약 패널 */
+        .summary-box {
+            margin-top: 20px;
+            background-color: #eef2f7;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #d0d7de;
+        }
+
+        .summary-box h3 {
+            font-size: 16px;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+
+        .summary-box .total-time {
+            font-size: 22px;
+            font-weight: bold;
+            color: #e67e22;
+        }
+
+        /* 목록 영역 */
+        .eval-list {
+            margin-top: 15px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .eval-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid #eee;
+            font-size: 13px;
+        }
+
+        .eval-item-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .eval-item-title {
+            font-weight: bold;
+        }
+
+        .eval-item-time {
+            color: #7f8c8d;
+            font-size: 12px;
+        }
+
+        .btn-delete {
+            background: none;
+            border: none;
+            color: #e74c3c;
+            cursor: pointer;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>📅 수행평가 일정 & 준비 시간 계산기</h1>
+        <p>이번 달 수행평가 제출일을 등록하고 예상 준비 시간을 한눈에 관리하세요!</p>
+    </header>
+
+    <div class="main-layout">
+        <!-- 달력 영역 -->
+        <div class="card">
+            <div class="calendar-header">
+                <h2 id="calendarTitle">2026년 9월</h2>
+            </div>
+            <div class="calendar-grid" id="calendarGrid">
+                <!-- 자바스크립트로 달력 날짜가 생성됩니다. -->
+            </div>
+        </div>
+
+        <!-- 수행평가 입력 및 총 시간 확인 영역 -->
+        <div class="card">
+            <h2>수행평가 등록</h2>
+            <form id="evalForm" style="margin-top: 15px;">
+                <div class="form-group">
+                    <label for="title">과목 / 수행평가명</label>
+                    <input type="text" id="title" placeholder="예: 국어 보고서 작성" required>
+                </div>
+                <div class="form-group">
+                    <label for="date">제출 / 평가 날짜</label>
+                    <input type="date" id="date" required>
+                </div>
+                <div class="form-group">
+                    <label for="hours">예상 준비 시간 (시간 단위)</label>
+                    <input type="number" id="hours" min="0.5" step="0.5" placeholder="예: 3" required>
+                </div>
+                <button type="submit" class="btn-add">수행평가 추가하기 ➕</button>
+            </form>
+
+            <!-- 총 준비시간 통계 -->
+            <div class="summary-box">
+                <h3>이번 달 총 준비 시간</h3>
+                <div class="total-time" id="totalHours">0 시간</div>
+                <p style="font-size: 12px; color: #666; margin-top: 4px;">미리 계획을 세워 여유 있게 준비해 보세요!</p>
+            </div>
+
+            <!-- 등록된 수행평가 목록 -->
+            <div class="eval-list" id="evalList">
+                <!-- 추가된 목록이 표시됩니다 -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // 현재 날짜 기준 달력 설정 (2026년 9월 기본 설정)
+    const currentDate = new Date(2026, 8, 1); // 9월 (0부터 시작하므로 8)
+    
+    // 로컬 스토리지 또는 초기 배열 데이터
+    let evaluations = JSON.parse(localStorage.getItem('evaluations')) || [
+        { id: 1, title: '영어 발표', date: '2026-09-15', hours: 2 },
+        { id: 2, title: '수학 단원평가', date: '2026-09-22', hours: 4 },
+        { id: 3, title: '과학 실험보고서', date: '2026-09-28', hours: 3 }
+    ];
+
+    // 페이지 로드시 초기화
+    document.addEventListener('DOMContentLoaded', () => {
+        // 오늘 날짜를 input[type="date"]의 기본값으로 설정
+        const todayStr = new Date().toISOString().split('T')[0];
+        document.getElementById('date').value = todayStr.startsWith('2026-09') ? todayStr : '2026-09-15';
+
+        renderCalendar();
+        renderListAndSummary();
+    });
+
+    // 폼 제출 시 수행평가 추가
+    document.getElementById('evalForm').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const title = document.getElementById('title').value;
+        const date = document.getElementById('date').value;
+        const hours = parseFloat(document.getElementById('hours').value);
+
+        const newEval = {
+            id: Date.now(),
+            title,
+            date,
+            hours
+        };
+
+        evaluations.push(newEval);
+        saveAndRender();
+
+        // 입력 폼 초기화
+        document.getElementById('title').value = '';
+        document.getElementById('hours').value = '';
+    });
+
+    // 삭제 기능
+    function deleteEval(id) {
+        evaluations = evaluations.filter(item => item.id !== id);
+        saveAndRender();
+    }
+
+    function saveAndRender() {
+        localStorage.setItem('evaluations', JSON.stringify(evaluations));
+        renderCalendar();
+        renderListAndSummary();
+    }
+
+    // 달력 그리기
+    function renderCalendar() {
+        const grid = document.getElementById('calendarGrid');
+        grid.innerHTML = '';
+
+        const year = currentDate.getFullYear();
+        const month = currentDate.getMonth();
+
+        document.getElementById('calendarTitle').textContent = `${year}년 ${month + 1}월`;
+
+        // 요일 헤더 생성
+        const days = ['일', '월', '화', '수', '목', '금', '토'];
+        days.forEach((day, idx) => {
+            const dayHeader = document.createElement('div');
+            dayHeader.className = 'day-header';
+            if (idx === 0) dayHeader.classList.add('sun');
+            if (idx === 6) dayHeader.classList.add('sat');
+            dayHeader.textContent = day;
+            grid.appendChild(dayHeader);
+        });
+
+        // 이번 달 1일 요일 및 전체 일수 구하기
+        const firstDayIndex = new Date(year, month, 1).getDay();
+        const lastDate = new Date(year, month + 1, 0).getDate();
+
+        // 지난달 빈 칸 채우기
+        const prevLastDate = new Date(year, month, 0).getDate();
+        for (let i = firstDayIndex; i > 0; i--) {
+            const cell = document.createElement('div');
+            cell.className = 'day-cell other-month';
+            cell.innerHTML = `<div class="date-num">${prevLastDate - i + 1}</div>`;
+            grid.appendChild(cell);
+        }
+
+        // 이번 달 날짜 채우기
+        for (let day = 1; day <= lastDate; day++) {
+            const cell = document.createElement('div');
+            cell.className = 'day-cell';
+            
+            const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+            cell.innerHTML = `<div class="date-num">${day}</div>`;
+
+            // 해당 날짜의 수행평가 검색
+            const dayEvals = evaluations.filter(item => item.date === dateStr);
+            dayEvals.forEach(item => {
+                const badge = document.createElement('div');
+                badge.className = `eval-badge ${item.hours >= 3 ? 'high-time' : ''}`;
+                badge.title = `${item.title} (예상: ${item.hours}시간)`;
+                badge.textContent = `${item.title} (${item.hours}h)`;
+                cell.appendChild(badge);
+            });
+
+            grid.appendChild(cell);
+        }
+    }
+
+    // 목록 및 총 소요시간 계산
+    function renderListAndSummary() {
+        const listEl = document.getElementById('evalList');
+        const totalHoursEl = document.getElementById('totalHours');
+        listEl.innerHTML = '';
+
+        let totalHours = 0;
+
+        // 정렬: 날짜 오름차순
+        const sortedEvals = [...evaluations].sort((a, b) => new Date(a.date) - new Date(b.date));
+
+        sortedEvals.forEach(item => {
+            totalHours += item.hours;
+
+            const itemEl = document.createElement('div');
+            itemEl.className = 'eval-item';
+            itemEl.innerHTML = `
+                <div class="eval-item-info">
+                    <span class="eval-item-title">${item.title}</span>
+                    <span class="eval-item-time">📅 ${item.date} | ⏱️ ${item.hours}시간 예상</span>
+                </div>
+                <button class="btn-delete" onclick="deleteEval(${item.id})">삭제</button>
+            `;
+            listEl.appendChild(itemEl);
+        });
+
+        totalHoursEl.textContent = `${totalHours} 시간`;
+    }
+</script>
+
+</body>
+</html>
