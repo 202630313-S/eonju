@@ -3,192 +3,986 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>오늘 뭐 먹지? | 점심 메뉴 추천기</title>
+    <title>언주중학교 수행평가 플래너</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts (Noto Sans KR) -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f0f7ff',
+                            100: '#e0effe',
+                            500: '#3b82f6',
+                            600: '#2563eb',
+                            700: '#1d4ed8',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Noto Sans KR', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
     <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Pretendard', 'Noto Sans KR', sans-serif;
-        }
-
         body {
-            background-color: #f7f9fc;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            font-family: 'Noto Sans KR', sans-serif;
+            background: linear-gradient(135deg, #f6f8fd 0%, #eef2f9 100%);
             min-height: 100vh;
-            padding: 20px;
         }
-
-        .container {
-            background-color: #ffffff;
-            width: 100%;
-            max-width: 480px;
-            padding: 40px 30px;
-            border-radius: 20px;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
-            text-align: center;
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            box-shadow: 0 10px 30px -10px rgba(0, 30, 80, 0.08);
         }
-
-        h1 {
-            color: #333333;
-            font-size: 28px;
-            margin-bottom: 10px;
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
         }
-
-        p.subtitle {
-            color: #666666;
-            font-size: 15px;
-            margin-bottom: 30px;
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f5f9;
+            border-radius: 4px;
         }
-
-        .display-box {
-            background-color: #fff8e1;
-            border: 2px dashed #ffb74d;
-            border-radius: 15px;
-            padding: 40px 20px;
-            margin-bottom: 30px;
-            min-height: 150px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            transition: all 0.3s ease;
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
         }
-
-        .category {
-            font-size: 14px;
-            color: #f57c00;
-            font-weight: bold;
-            margin-bottom: 8px;
-            text-transform: uppercase;
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
         }
-
-        .menu-name {
-            font-size: 32px;
-            font-weight: bold;
-            color: #2c3e50;
-            word-break: keep-all;
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
         }
-
-        .btn-group {
-            display: flex;
-            gap: 10px;
-            justify-content: center;
-        }
-
-        button {
-            border: none;
-            outline: none;
-            padding: 15px 25px;
-            font-size: 16px;
-            font-weight: bold;
-            border-radius: 12px;
-            cursor: pointer;
-            transition: transform 0.1s ease, background-color 0.2s ease;
-            width: 100%;
-        }
-
-        .btn-recommend {
-            background-color: #ff7043;
-            color: white;
-            box-shadow: 0 4px 12px rgba(255, 112, 67, 0.3);
-        }
-
-        .btn-recommend:hover {
-            background-color: #f4511e;
-        }
-
-        .btn-recommend:active {
-            transform: scale(0.98);
-        }
-
-        /* 룰렛 애니메이션 효과 */
-        .spinning {
-            animation: pulse 0.1s infinite alternate;
-        }
-
-        @keyframes pulse {
-            0% { transform: scale(0.98); opacity: 0.8; }
-            100% { transform: scale(1.02); opacity: 1; }
+        .animate-fade-in {
+            animation: fadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         }
     </style>
 </head>
-<body>
+<body class="text-slate-800 antialiased flex flex-col justify-between min-h-screen">
 
-    <div class="container">
-        <h1>🍱 오늘 뭐 먹지?</h1>
-        <p class="subtitle">결정이 어려운 당신을 위한 랜덤 점심 추천기</p>
+    <!-- Top Navigation Bar -->
+    <header id="mainHeader" class="hidden sticky top-0 z-30 bg-white/80 backdrop-blur-md border-b border-slate-200/80 px-4 lg:px-8 py-3">
+        <div class="max-w-7xl mx-auto flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-500 flex items-center justify-center text-white font-bold text-lg shadow-md shadow-blue-500/20">
+                    <i class="fa-solid fa-calendar-check"></i>
+                </div>
+                <div>
+                    <h1 class="font-bold text-slate-800 text-lg leading-tight">수행평가 플래너</h1>
+                    <p id="userProfileBadge" class="text-xs text-slate-500 font-medium">언주중학교 · 학년 반 정보 없음</p>
+                </div>
+            </div>
 
-        <div class="display-box" id="displayBox">
-            <div class="category" id="categoryText">카테고리</div>
-            <div class="menu-name" id="menuText">버튼을 눌러주세요!</div>
+            <div class="flex items-center space-x-2 sm:space-x-3">
+                <!-- Admin Button (Condition: email == '202630313@eonju.ms.kr') -->
+                <button id="adminBtn" onclick="openAdminModal()" class="hidden items-center space-x-2 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white text-xs sm:text-sm font-semibold px-3.5 py-2 rounded-xl shadow-md transition-all transform active:scale-95">
+                    <i class="fa-solid fa-wand-magic-sparkles"></i>
+                    <span>개설자 모드</span>
+                </button>
+
+                <!-- Notification Toggle Trigger -->
+                <button onclick="openNotifSettings()" class="p-2 text-slate-600 hover:text-blue-600 hover:bg-slate-100 rounded-xl transition-all relative" title="알림 설정">
+                    <i class="fa-regular fa-bell text-lg"></i>
+                    <span id="notifDot" class="absolute top-1.5 right-1.5 w-2 h-2 bg-blue-500 rounded-full"></span>
+                </button>
+
+                <!-- User Switch/Logout -->
+                <button onclick="resetFlow()" class="text-xs text-slate-500 hover:text-slate-800 px-2.5 py-2 rounded-lg hover:bg-slate-100 transition-all">
+                    <i class="fa-solid fa-arrow-right-from-bracket mr-1"></i> 재설정
+                </button>
+            </div>
         </div>
+    </header>
 
-        <div class="btn-group">
-            <button class="btn-recommend" onclick="recommendMenu()">점심 메뉴 추천받기 🎲</button>
+    <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8 flex flex-col justify-center">
+
+        <!-- STEP 1: Email Login Page -->
+        <section id="step1" class="w-full max-w-md mx-auto animate-fade-in">
+            <div class="glass-panel p-8 rounded-3xl shadow-xl text-center border border-white">
+                <div class="w-16 h-16 bg-blue-100 text-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-5 text-2xl shadow-inner">
+                    <i class="fa-solid fa-school-flag"></i>
+                </div>
+                <h2 class="text-2xl font-bold text-slate-800 mb-2">언주중학교 플래너</h2>
+                <p class="text-sm text-slate-500 mb-6 leading-relaxed">수행평가 일정을 놓치지 않고 준비 시간을 명확하게 확인하기 위해 학교 계정으로 로그인해 주세요.</p>
+
+                <form onsubmit="handleStep1(event)" class="space-y-4 text-left">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1.5">학교 이메일 계정</label>
+                        <div class="relative">
+                            <input type="email" id="inputEmail" placeholder="example@eonju.ms.kr" required
+                                class="w-full px-4 py-3 pl-10 rounded-xl border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-all text-sm">
+                            <i class="fa-regular fa-envelope absolute left-3.5 top-3.5 text-slate-400"></i>
+                        </div>
+                        <p class="text-[11px] text-slate-400 mt-1.5">학교 부여 이메일 주소를 입력해 주세요.</p>
+                    </div>
+
+                    <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3.5 rounded-xl transition-all shadow-lg shadow-blue-500/25 flex items-center justify-center space-x-2 group">
+                        <span>다음 단계로 이동</span>
+                        <i class="fa-solid fa-arrow-right text-xs group-hover:translate-x-1 transition-transform"></i>
+                    </button>
+                </form>
+
+                <div class="mt-6 pt-4 border-t border-slate-100">
+                    <p class="text-xs text-slate-400">개설자 관리자 테스트 계정:<br><span class="font-mono text-blue-600 font-medium">202630313@eonju.ms.kr</span></p>
+                </div>
+            </div>
+        </section>
+
+        <!-- STEP 2: Grade & Class Selection Page -->
+        <section id="step2" class="w-full max-w-md mx-auto hidden animate-fade-in">
+            <div class="glass-panel p-8 rounded-3xl shadow-xl text-center border border-white">
+                <div class="w-16 h-16 bg-indigo-100 text-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-5 text-2xl shadow-inner">
+                    <i class="fa-solid fa-users"></i>
+                </div>
+                <h2 class="text-2xl font-bold text-slate-800 mb-2">소속 학급 선택</h2>
+                <p class="text-sm text-slate-500 mb-6">해당 학년과 반에 등록된 수행평가 일정을 자동으로 불러옵니다.</p>
+
+                <form onsubmit="handleStep2(event)" class="space-y-4 text-left">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1.5">학년</label>
+                            <select id="selectGrade" required class="w-full px-3.5 py-3 rounded-xl border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none text-sm bg-white">
+                                <option value="1">1 학년</option>
+                                <option value="2">2 학년</option>
+                                <option value="3" selected>3 학년</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1.5">반</label>
+                            <select id="selectClass" required class="w-full px-3.5 py-3 rounded-xl border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none text-sm bg-white">
+                                <!-- Generated JS options 1~20 -->
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="flex space-x-3 pt-2">
+                        <button type="button" onclick="goToStep(1)" class="w-1/3 bg-slate-100 hover:bg-slate-200 text-slate-600 font-semibold py-3.5 rounded-xl transition-all text-sm">
+                            이전
+                        </button>
+                        <button type="submit" class="w-2/3 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3.5 rounded-xl transition-all shadow-lg shadow-blue-500/25 text-sm">
+                            달력 입장하기
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </section>
+
+        <!-- STEP 3: Main Dashboard Page -->
+        <section id="step3" class="hidden w-full space-y-6 animate-fade-in my-auto">
+            
+            <!-- Notification Permission Banner (Prompt if default) -->
+            <div id="notifBanner" class="glass-panel p-4 rounded-2xl border-l-4 border-l-blue-500 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-sm">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center shrink-0">
+                        <i class="fa-solid fa-bell text-lg"></i>
+                    </div>
+                    <div>
+                        <p class="text-sm font-semibold text-slate-800">수행평가 마감 알림을 켜두세요!</p>
+                        <p class="text-xs text-slate-500">전날 밤 10시, 당일 오전 8시에 잊지 않도록 알림을 전송해 드립니다.</p>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-2 w-full sm:w-auto justify-end">
+                    <button onclick="requestNotificationPermission()" class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold px-4 py-2 rounded-xl transition-all shadow-md">
+                        알림 활성화하기
+                    </button>
+                    <button onclick="dismissBanner()" class="text-slate-400 hover:text-slate-600 p-2 text-xs">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+                <!-- Left Sidebar: Summary & Upcoming -->
+                <div class="lg:col-span-1 space-y-6">
+                    <!-- School Class Info Card -->
+                    <div class="glass-panel p-5 rounded-2xl">
+                        <div class="flex items-center justify-between border-b border-slate-100 pb-3 mb-3">
+                            <span class="text-xs font-bold uppercase tracking-wider text-slate-400">내 정보</span>
+                            <span id="userBadgeType" class="text-[10px] bg-slate-100 text-slate-600 font-bold px-2 py-0.5 rounded-full">학생</span>
+                        </div>
+                        <h3 id="sidebarClassText" class="text-xl font-bold text-slate-800">3학년 3반</h3>
+                        <p id="sidebarEmailText" class="text-xs text-slate-500 mt-0.5 font-mono">user@eonju.ms.kr</p>
+                    </div>
+
+                    <!-- Upcoming Critical Assessments TOP 3 -->
+                    <div class="glass-panel p-5 rounded-2xl space-y-4">
+                        <div class="flex items-center justify-between">
+                            <h4 class="font-bold text-slate-800 text-sm flex items-center">
+                                <i class="fa-solid fa-fire text-amber-500 mr-2"></i> 다가오는 수행평가 TOP 3
+                            </h4>
+                        </div>
+                        <div id="upcomingList" class="space-y-3">
+                            <!-- Dynamic Content populated via JS -->
+                        </div>
+                    </div>
+
+                    <!-- Preparation Tip Widget -->
+                    <div class="bg-gradient-to-br from-indigo-500 to-blue-600 text-white p-5 rounded-2xl shadow-lg relative overflow-hidden">
+                        <div class="relative z-10">
+                            <span class="text-[10px] bg-white/20 backdrop-blur-md text-white font-bold px-2 py-0.5 rounded-md">꿀팁</span>
+                            <h5 class="font-bold text-base mt-2">시간 배분 가이드</h5>
+                            <p class="text-xs text-blue-100 mt-1 leading-relaxed">
+                                국어 A/B, 과학 A/B는 내용이 상이하므로 과목별 예상 소요 시간을 확인 후 최소 2일 전부터 자료 조사를 시작하세요!
+                            </p>
+                        </div>
+                        <i class="fa-solid fa-lightbulb absolute -bottom-4 -right-2 text-7xl opacity-15"></i>
+                    </div>
+                </div>
+
+                <!-- Main Calendar Section -->
+                <div class="lg:col-span-3 glass-panel p-5 sm:p-6 rounded-2xl flex flex-col justify-between">
+                    <!-- Calendar Header -->
+                    <div class="flex flex-col sm:flex-row items-center justify-between gap-4 mb-6">
+                        <div class="flex items-center space-x-3">
+                            <h2 id="calendarMonthYear" class="text-2xl font-bold text-slate-800">2026년 9월</h2>
+                            <button onclick="changeMonth(0)" class="text-xs text-slate-500 hover:text-blue-600 bg-slate-100 hover:bg-blue-50 px-2.5 py-1 rounded-lg transition-all">
+                                오늘
+                            </button>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <button onclick="changeMonth(-1)" class="w-9 h-9 flex items-center justify-center rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 transition-all">
+                                <i class="fa-solid fa-chevron-left text-xs"></i>
+                            </button>
+                            <button onclick="changeMonth(1)" class="w-9 h-9 flex items-center justify-center rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 transition-all">
+                                <i class="fa-solid fa-chevron-right text-xs"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Calendar Grid -->
+                    <div class="w-full">
+                        <!-- Day Labels -->
+                        <div class="grid grid-cols-7 text-center mb-2 text-xs font-semibold text-slate-400">
+                            <div class="text-rose-500">일</div>
+                            <div>월</div>
+                            <div>화</div>
+                            <div>수</div>
+                            <div>목</div>
+                            <div>금</div>
+                            <div class="text-blue-500">토</div>
+                        </div>
+                        <!-- Date Cells -->
+                        <div id="calendarGrid" class="grid grid-cols-7 gap-1 sm:gap-2 auto-rows-fr">
+                            <!-- Dynamic Day Cells -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="text-center py-4 text-xs text-slate-400 border-t border-slate-200/50 mt-8">
+        © 2026 언주중학교 수행평가 플래너 · 학생들을 위한 스마트 학습 지원 서비스
+    </footer>
+
+    <!-- MODAL 1: Admin Assessment Creator/Manager Modal (개설자 모드) -->
+    <div id="adminModal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-2xl w-full p-6 sm:p-8 max-h-[90vh] overflow-y-auto custom-scrollbar shadow-2xl animate-fade-in border border-slate-100">
+            <div class="flex items-center justify-between border-b border-slate-100 pb-4 mb-5">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 rounded-xl bg-amber-100 text-amber-600 flex items-center justify-center text-lg font-bold">
+                        <i class="fa-solid fa-pen-to-square"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-slate-800 text-lg">수행평가 일정 등록/관리</h3>
+                        <p class="text-xs text-slate-500">모든 학급의 수행평가 안내문 및 준비 예상 시간을 관리합니다.</p>
+                    </div>
+                </div>
+                <button onclick="closeAdminModal()" class="text-slate-400 hover:text-slate-600 p-2 text-lg">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <!-- Add Form -->
+            <form onsubmit="saveAssessment(event)" class="space-y-4">
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">대상 학년</label>
+                        <select id="formGrade" required class="w-full p-2.5 rounded-xl border border-slate-200 text-xs bg-white">
+                            <option value="1">1 학년</option>
+                            <option value="2">2 학년</option>
+                            <option value="3" selected>3 학년</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">대상 반</label>
+                        <select id="formClass" required class="w-full p-2.5 rounded-xl border border-slate-200 text-xs bg-white">
+                            <option value="all">전체 반 대상</option>
+                            <!-- Generated JS options 1~20 -->
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">과목 선택 (국어/과학 A,B 구분)</label>
+                        <select id="formSubject" required class="w-full p-2.5 rounded-xl border border-slate-200 text-xs bg-white font-medium">
+                            <option value="국어 A">국어 A</option>
+                            <option value="국어 B">국어 B</option>
+                            <option value="수학">수학</option>
+                            <option value="영어">영어</option>
+                            <option value="과학 A">과학 A</option>
+                            <option value="과학 B">과학 B</option>
+                            <option value="사회">사회</option>
+                            <option value="역사">역사</option>
+                            <option value="도덕">도덕</option>
+                            <option value="기술가정">기술가정</option>
+                            <option value="미술">미술</option>
+                            <option value="체육">체육</option>
+                            <option value="음악">음악</option>
+                            <option value="기타">기타</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">수행평가 제목</label>
+                    <input type="text" id="formTitle" placeholder="예: [국어 A] 독서 감상문 발표 및 서평 작성" required
+                        class="w-full p-2.5 rounded-xl border border-slate-200 text-xs outline-none focus:border-blue-500">
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">제출 / 평가 마감일</label>
+                        <input type="date" id="formDueDate" required class="w-full p-2.5 rounded-xl border border-slate-200 text-xs outline-none focus:border-blue-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">예상 준비 소요 시간 가이드</label>
+                        <input type="text" id="formPrepTime" placeholder="예: D-3일 전부터 준비 추천 (총 4시간 소요)" required
+                            class="w-full p-2.5 rounded-xl border border-slate-200 text-xs outline-none focus:border-blue-500">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">상세 안내문 / 준비물 / 평가 기준</label>
+                    <textarea id="formDescription" rows="3" placeholder="수행평가의 세부 기준 및 준비물, 안내 사항을 상세히 작성해 주세요." required
+                        class="w-full p-2.5 rounded-xl border border-slate-200 text-xs outline-none focus:border-blue-500 custom-scrollbar"></textarea>
+                </div>
+
+                <button type="submit" class="w-full bg-amber-500 hover:bg-amber-600 text-white font-semibold py-3 rounded-xl transition-all shadow-md text-xs">
+                    + 수행평가 일정 신규 등록하기
+                </button>
+            </form>
+
+            <!-- Registered Assessments List -->
+            <div class="mt-8 border-t border-slate-100 pt-5">
+                <h4 class="font-bold text-slate-800 text-sm mb-3">현재 등록된 전체 수행평가 목록</h4>
+                <div id="adminAssessmentList" class="space-y-2 max-h-56 overflow-y-auto custom-scrollbar pr-1">
+                    <!-- Dynamic JS List -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL 2: Assessment Detail Modal for Students -->
+    <div id="detailModal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 max-h-[90vh] overflow-y-auto custom-scrollbar shadow-2xl animate-fade-in relative border border-slate-100">
+            <button onclick="closeDetailModal()" class="absolute top-5 right-5 text-slate-400 hover:text-slate-600 p-2">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+
+            <div id="detailContent">
+                <!-- Dynamically filled by JS -->
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL 3: Notification Settings Modal -->
+    <div id="notifModal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl animate-fade-in border border-slate-100">
+            <div class="flex items-center justify-between border-b border-slate-100 pb-3 mb-4">
+                <h3 class="font-bold text-slate-800 text-base flex items-center">
+                    <i class="fa-solid fa-bell text-blue-500 mr-2"></i> 알림 설정 관리
+                </h3>
+                <button onclick="closeNotifModal()" class="text-slate-400 hover:text-slate-600 p-1">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <div class="space-y-4">
+                <div class="flex items-center justify-between bg-slate-50 p-3.5 rounded-2xl">
+                    <div>
+                        <p class="text-xs font-bold text-slate-800">D-1 전날 알림 설정</p>
+                        <p class="text-[11px] text-slate-500">수행평가 전날 밤 10:00 알림 발송</p>
+                    </div>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" id="toggleNotifD1" checked onchange="saveNotifSettings()" class="sr-only peer">
+                        <div class="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                    </label>
+                </div>
+
+                <div class="flex items-center justify-between bg-slate-50 p-3.5 rounded-2xl">
+                    <div>
+                        <p class="text-xs font-bold text-slate-800">D-Day 당일 알림 설정</p>
+                        <p class="text-[11px] text-slate-500">수행평가 당일 오전 08:00 알림 발송</p>
+                    </div>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" id="toggleNotifDDay" checked onchange="saveNotifSettings()" class="sr-only peer">
+                        <div class="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                    </label>
+                </div>
+
+                <div class="pt-2">
+                    <button onclick="triggerTestNotification()" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold py-2.5 rounded-xl text-xs transition-all flex items-center justify-center space-x-1.5">
+                        <i class="fa-solid fa-paper-plane"></i>
+                        <span>테스트 알림 즉시 보내보기</span>
+                    </button>
+                </div>
+            </div>
         </div>
     </div>
 
     <script>
-        // 추천할 점심 메뉴 데이터베이스
-        const menuList = [
-            { name: "김치찌개", category: "한식 🍚" },
-            { name: "된장찌개", category: "한식 🍚" },
-            { name: "제육볶음", category: "한식 🍚" },
-            { name: "비빔밥", category: "한식 🍚" },
-            { name: "국밥 (돼지/순대/소머리)", category: "한식 🍚" },
-            { name: "짜장면 & 짬뽕", category: "중식 🥢" },
-            { name: "볶음밥", category: "중식 🥢" },
-            { name: "마라탕", category: "중식 🥢" },
-            { name: "돈까스", category: "일식 🍣" },
-            { name: "초밥", category: "일식 🍣" },
-            { name: "라멘", category: "일식 🍣" },
-            { name: "우동", category: "일식 🍣" },
-            { name: "파스타", category: "양식 🍝" },
-            { name: "수제버거", category: "양식 🍝" },
-            { name: "피자", category: "양식 🍝" },
-            { name: "떡볶이 & 분식", category: "분식 떡" },
-            { name: "칼국수 / 수제비", category: "면류 🍜" },
-            { name: "쌀국수", category: "아시안 🌏" },
-            { name: "샌드위치 / 샐러드", category: "가벼운 한끼 🥗" }
+        /* GLOBAL STATE */
+        const ADMIN_EMAIL = "202630313@eonju.ms.kr";
+        
+        let currentUser = {
+            email: "",
+            grade: "3",
+            classNum: "3",
+            isAdmin: false
+        };
+
+        let currentDate = new Date(2026, 8, 22); // Default to Sept 2026 for rich realistic demo
+        let currentMonth = currentDate.getMonth();
+        let currentYear = currentDate.getFullYear();
+
+        // Color badge dictionary for subjects
+        const subjectColors = {
+            '국어 A': 'bg-rose-50 text-rose-700 border-rose-200',
+            '국어 B': 'bg-pink-50 text-pink-700 border-pink-200',
+            '수학': 'bg-blue-50 text-blue-700 border-blue-200',
+            '영어': 'bg-purple-50 text-purple-700 border-purple-200',
+            '과학 A': 'bg-emerald-50 text-emerald-700 border-emerald-200',
+            '과학 B': 'bg-teal-50 text-teal-700 border-teal-200',
+            '사회': 'bg-amber-50 text-amber-700 border-amber-200',
+            '역사': 'bg-orange-50 text-orange-700 border-orange-200',
+            '도덕': 'bg-lime-50 text-lime-700 border-lime-200',
+            '기술가정': 'bg-cyan-50 text-cyan-700 border-cyan-200',
+            '미술': 'bg-indigo-50 text-indigo-700 border-indigo-200',
+            '체육': 'bg-red-50 text-red-700 border-red-200',
+            '음악': 'bg-sky-50 text-sky-700 border-sky-200',
+            '기타': 'bg-slate-50 text-slate-700 border-slate-200'
+        };
+
+        // Sample Pre-populated Assessments
+        const defaultAssessments = [
+            {
+                id: '1',
+                grade: '3',
+                classNum: '3',
+                subject: '국어 A',
+                title: '현대 소설 독서 감상문 발표 및 서평',
+                dueDate: '2026-09-25',
+                prepTime: 'D-3일 전 준비 추천 (총 4시간)',
+                description: '지정된 현대 소설 중 1권을 읽고 주제의식과 작가의 표현 기법을 분석하여 800자 서평 작성 후 3분 발표 준비.'
+            },
+            {
+                id: '2',
+                grade: '3',
+                classNum: '3',
+                subject: '과학 B',
+                title: '화학 반응 속도 측정 실험 보고서',
+                dueDate: '2026-09-28',
+                prepTime: 'D-2일 전 준비 추천 (약 2시간)',
+                description: '농도와 온도에 따른 화학 반응 속도 실험 결과를 그래프로 시각화하고 오차 원인을 도출하는 보고서 작성 제출.'
+            },
+            {
+                id: '3',
+                grade: '3',
+                classNum: '3',
+                subject: '영어',
+                title: 'My Dream Career 3분 영어 스피치',
+                dueDate: '2026-10-02',
+                prepTime: 'D-5일 전 준비 추천 (총 6시간)',
+                description: '자신의 희망 직업과 진로 계획에 대한 영어 대본 작성(150단어 내외) 및 PPT 2장 제작하여 발표 구술 평가.'
+            },
+            {
+                id: '4',
+                grade: '3',
+                classNum: 'all',
+                subject: '역사',
+                title: '근대화 운동 주요 사건 비교 마인드맵',
+                dueDate: '2026-09-30',
+                prepTime: 'D-1일 전 준비 추천 (약 1.5시간)',
+                description: '갑신정변, 동학농민운동, 갑오개혁의 공통점과 차이점을 핵심 키워드 중심 마인드맵으로 A3 용지에 작성.'
+            }
         ];
 
-        let isSpinning = false;
+        let assessments = [];
 
-        function recommendMenu() {
-            if (isSpinning) return; // 이미 실행 중이면 중복 클릭 방지
+        window.onload = function() {
+            populateClassOptions();
+            loadLocalStorage();
+            checkExistingSession();
+        };
 
-            isSpinning = true;
-            const displayBox = document.getElementById("displayBox");
-            const menuText = document.getElementById("menuText");
-            const categoryText = document.getElementById("categoryText");
+        function populateClassOptions() {
+            const selects = [document.getElementById('selectClass'), document.getElementById('formClass')];
+            selects.forEach(select => {
+                if (!select) return;
+                const isForm = select.id === 'formClass';
+                if (!isForm) select.innerHTML = '';
+                for (let i = 1; i <= 20; i++) {
+                    const opt = document.createElement('option');
+                    opt.value = i.toString();
+                    opt.textContent = `${i} 반`;
+                    select.appendChild(opt);
+                }
+            });
+        }
 
-            displayBox.classList.add("spinning");
+        function loadLocalStorage() {
+            const stored = localStorage.getItem('eonju_assessments');
+            if (stored) {
+                assessments = JSON.parse(stored);
+            } else {
+                assessments = [...defaultAssessments];
+                saveAssessmentsToStorage();
+            }
 
-            // 1초 동안 메뉴가 빠르게 바뀌는 효과
-            let counter = 0;
-            const interval = setInterval(() => {
-                const tempIndex = Math.floor(Math.random() * menuList.length);
-                menuText.textContent = menuList[tempIndex].name;
-                categoryText.textContent = menuList[tempIndex].category;
-                counter++;
-            }, 50);
+            const storedUser = localStorage.getItem('eonju_user');
+            if (storedUser) {
+                currentUser = JSON.parse(storedUser);
+            }
+        }
 
-            // 1초 후 최종 결과 결정
-            setTimeout(() => {
-                clearInterval(interval);
-                displayBox.classList.remove("spinning");
+        function saveAssessmentsToStorage() {
+            localStorage.setItem('eonju_assessments', JSON.stringify(assessments));
+        }
 
-                const finalIndex = Math.floor(Math.random() * menuList.length);
-                const result = menuList[finalIndex];
+        function saveUserToStorage() {
+            localStorage.setItem('eonju_user', JSON.stringify(currentUser));
+        }
 
-                categoryText.textContent = result.category;
-                menuText.textContent = result.name;
+        function checkExistingSession() {
+            if (currentUser.email && currentUser.grade && currentUser.classNum) {
+                updateUIStateForLogin();
+                goToStep(3);
+            } else {
+                goToStep(1);
+            }
+        }
+
+        /* NAVIGATION & STEP FLOW */
+        function goToStep(stepNumber) {
+            document.getElementById('step1').classList.add('hidden');
+            document.getElementById('step2').classList.add('hidden');
+            document.getElementById('step3').classList.add('hidden');
+            document.getElementById('mainHeader').classList.add('hidden');
+
+            if (stepNumber === 1) {
+                document.getElementById('step1').classList.remove('hidden');
+            } else if (stepNumber === 2) {
+                document.getElementById('step2').classList.remove('hidden');
+            } else if (stepNumber === 3) {
+                document.getElementById('mainHeader').classList.remove('hidden');
+                document.getElementById('step3').classList.remove('hidden');
+                renderDashboard();
+            }
+        }
+
+        function handleStep1(e) {
+            e.preventDefault();
+            const emailInput = document.getElementById('inputEmail').value.trim();
+            if (!emailInput) return;
+
+            currentUser.email = emailInput;
+            currentUser.isAdmin = (emailInput === ADMIN_EMAIL);
+            
+            updateUIStateForLogin();
+            goToStep(2);
+        }
+
+        function handleStep2(e) {
+            e.preventDefault();
+            currentUser.grade = document.getElementById('selectGrade').value;
+            currentUser.classNum = document.getElementById('selectClass').value;
+            
+            saveUserToStorage();
+            updateUIStateForLogin();
+            goToStep(3);
+        }
+
+        function updateUIStateForLogin() {
+            // Profile text
+            document.getElementById('userProfileBadge').textContent = `언주중학교 · ${currentUser.grade}학년 ${currentUser.classNum}반`;
+            document.getElementById('sidebarClassText').textContent = `${currentUser.grade}학년 ${currentUser.classNum}반`;
+            document.getElementById('sidebarEmailText').textContent = currentUser.email;
+
+            // Admin button visibility
+            const adminBtn = document.getElementById('adminBtn');
+            const userBadgeType = document.getElementById('userBadgeType');
+
+            if (currentUser.isAdmin) {
+                adminBtn.classList.remove('hidden');
+                adminBtn.classList.add('flex');
+                userBadgeType.textContent = "개설자 (관리자)";
+                userBadgeType.className = "text-[10px] bg-amber-100 text-amber-700 font-bold px-2 py-0.5 rounded-full";
+            } else {
+                adminBtn.classList.add('hidden');
+                adminBtn.classList.remove('flex');
+                userBadgeType.textContent = "학생";
+                userBadgeType.className = "text-[10px] bg-slate-100 text-slate-600 font-bold px-2 py-0.5 rounded-full";
+            }
+        }
+
+        function resetFlow() {
+            currentUser = { email: "", grade: "3", classNum: "3", isAdmin: false };
+            localStorage.removeItem('eonju_user');
+            document.getElementById('inputEmail').value = '';
+            goToStep(1);
+        }
+
+        function renderDashboard() {
+            renderCalendar();
+            renderUpcomingList();
+        }
+
+        function renderCalendar() {
+            const grid = document.getElementById('calendarGrid');
+            grid.innerHTML = '';
+
+            const monthYearText = document.getElementById('calendarMonthYear');
+            monthYearText.textContent = `${currentYear}년 ${currentMonth + 1}월`;
+
+            const firstDayIndex = new Date(currentYear, currentMonth, 1).getDay();
+            const totalDays = new Date(currentYear, currentMonth + 1, 0).getDate();
+
+            // Filter relevant assessments for current grade/class
+            const userEvents = assessments.filter(a => 
+                a.grade === currentUser.grade && 
+                (a.classNum === currentUser.classNum || a.classNum === 'all')
+            );
+
+            // Previous month blank padding
+            for (let i = 0; i < firstDayIndex; i++) {
+                const emptyCell = document.createElement('div');
+                emptyCell.className = "min-h-[90px] sm:min-h-[110px] bg-slate-50/50 rounded-xl border border-slate-100/50 opacity-40";
+                grid.appendChild(emptyCell);
+            }
+
+            // Current month days
+            const today = new Date();
+            for (let day = 1; day <= totalDays; day++) {
+                const dateStr = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                const isToday = (today.getFullYear() === currentYear && today.getMonth() === currentMonth && today.getDate() === day);
+
+                const cell = document.createElement('div');
+                cell.className = `min-h-[90px] sm:min-h-[110px] p-1.5 sm:p-2 rounded-xl border transition-all flex flex-col justify-between ${
+                    isToday ? 'bg-blue-50/60 border-blue-300 ring-2 ring-blue-200' : 'bg-white border-slate-100 hover:border-slate-200'
+                }`;
+
+                // Date Label Header
+                const dateHeader = document.createElement('div');
+                dateHeader.className = "flex items-center justify-between";
                 
-                isSpinning = false;
-            }, 1000);
+                const dateNum = document.createElement('span');
+                dateNum.className = `text-xs font-semibold ${isToday ? 'bg-blue-600 text-white w-5 h-5 rounded-full flex items-center justify-center' : 'text-slate-700'}`;
+                dateNum.textContent = day;
+                dateHeader.appendChild(dateNum);
+
+                cell.appendChild(dateHeader);
+
+                // Event Badges on this day
+                const dayEventsContainer = document.createElement('div');
+                dayEventsContainer.className = "mt-1 space-y-1 overflow-y-auto max-h-[70px] custom-scrollbar";
+
+                const matchedEvents = userEvents.filter(e => e.dueDate === dateStr);
+                matchedEvents.forEach(item => {
+                    const badge = document.createElement('div');
+                    const colorStyle = subjectColors[item.subject] || 'bg-slate-50 text-slate-700 border-slate-200';
+                    badge.className = `text-[10px] sm:text-xs font-semibold p-1 px-1.5 rounded-lg border cursor-pointer hover:shadow-sm transition-all truncate ${colorStyle}`;
+                    badge.innerHTML = `<span class="font-bold">[${item.subject}]</span> ${item.title}`;
+                    badge.onclick = (e) => {
+                        e.stopPropagation();
+                        openDetailModal(item);
+                    };
+                    dayEventsContainer.appendChild(badge);
+                });
+
+                cell.appendChild(dayEventsContainer);
+                grid.appendChild(cell);
+            }
+        }
+
+        function changeMonth(delta) {
+            if (delta === 0) {
+                const now = new Date(2026, 8, 22);
+                currentMonth = now.getMonth();
+                currentYear = now.getFullYear();
+            } else {
+                currentMonth += delta;
+                if (currentMonth < 0) {
+                    currentMonth = 11;
+                    currentYear--;
+                } else if (currentMonth > 11) {
+                    currentMonth = 0;
+                    currentYear++;
+                }
+            }
+            renderCalendar();
+        }
+
+        function renderUpcomingList() {
+            const listContainer = document.getElementById('upcomingList');
+            listContainer.innerHTML = '';
+
+            const userEvents = assessments.filter(a => 
+                a.grade === currentUser.grade && 
+                (a.classNum === currentUser.classNum || a.classNum === 'all')
+            );
+
+            // Sort by due date ascending
+            const sorted = userEvents.sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate));
+            const top3 = sorted.slice(0, 3);
+
+            if (top3.length === 0) {
+                listContainer.innerHTML = `<p class="text-xs text-slate-400 py-4 text-center">등록된 수행평가가 없습니다.</p>`;
+                return;
+            }
+
+            const today = new Date("2026-09-22"); // Base benchmark date for consistency
+
+            top3.forEach(item => {
+                const due = new Date(item.dueDate);
+                const diffTime = due - today;
+                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+                let dDayText = "";
+                let dDayBadgeClass = "";
+
+                if (diffDays === 0) {
+                    dDayText = "D-Day";
+                    dDayBadgeClass = "bg-rose-500 text-white font-bold animate-pulse";
+                } else if (diffDays > 0) {
+                    dDayText = `D-${diffDays}`;
+                    dDayBadgeClass = diffDays <= 3 ? "bg-amber-500 text-white font-bold" : "bg-blue-100 text-blue-700 font-bold";
+                } else {
+                    dDayText = `마감됨`;
+                    dDayBadgeClass = "bg-slate-200 text-slate-600";
+                }
+
+                const card = document.createElement('div');
+                card.className = "p-3 rounded-xl bg-slate-50 border border-slate-100 hover:border-blue-200 transition-all cursor-pointer";
+                card.onclick = () => openDetailModal(item);
+
+                card.innerHTML = `
+                    <div class="flex items-center justify-between mb-1">
+                        <span class="text-[11px] font-bold text-slate-600">[${item.subject}]</span>
+                        <span class="text-[10px] px-2 py-0.5 rounded-md ${dDayBadgeClass}">${dDayText}</span>
+                    </div>
+                    <p class="text-xs font-semibold text-slate-800 line-clamp-1">${item.title}</p>
+                    <p class="text-[11px] text-blue-600 mt-1 flex items-center font-medium">
+                        <i class="fa-regular fa-clock mr-1"></i> ${item.prepTime}
+                    </p>
+                `;
+                listContainer.appendChild(card);
+            });
+        }
+
+        function openDetailModal(item) {
+            const modal = document.getElementById('detailModal');
+            const content = document.getElementById('detailContent');
+
+            const colorStyle = subjectColors[item.subject] || 'bg-slate-50 text-slate-700 border-slate-200';
+
+            content.innerHTML = `
+                <div class="space-y-4">
+                    <div class="flex items-center space-x-2">
+                        <span class="text-xs font-bold px-2.5 py-1 rounded-lg border ${colorStyle}">${item.subject}</span>
+                        <span class="text-xs text-slate-500 font-medium">${item.grade}학년 ${item.classNum === 'all' ? '전체 반' : item.classNum + '반'}</span>
+                    </div>
+
+                    <h3 class="text-xl font-bold text-slate-800 leading-snug">${item.title}</h3>
+
+                    <div class="bg-amber-50/80 border border-amber-200 p-3.5 rounded-2xl flex items-start space-x-3">
+                        <i class="fa-solid fa-stopwatch text-amber-600 text-base mt-0.5"></i>
+                        <div>
+                            <p class="text-xs font-bold text-amber-900">권장 준비 소요 시간</p>
+                            <p class="text-xs text-amber-800 mt-0.5 font-medium">${item.prepTime}</p>
+                        </div>
+                    </div>
+
+                    <div class="space-y-1">
+                        <p class="text-xs font-bold text-slate-600">제출 마감 일자</p>
+                        <p class="text-sm font-semibold text-slate-800"><i class="fa-regular fa-calendar-check text-blue-500 mr-1.5"></i>${item.dueDate}</p>
+                    </div>
+
+                    <div class="space-y-1 pt-2 border-t border-slate-100">
+                        <p class="text-xs font-bold text-slate-600">수행평가 상세 안내 및 준비사항</p>
+                        <p class="text-xs text-slate-700 leading-relaxed whitespace-pre-line bg-slate-50 p-3 rounded-xl border border-slate-100">${item.description}</p>
+                    </div>
+
+                    <div class="pt-2">
+                        <button onclick="closeDetailModal()" class="w-full bg-slate-800 hover:bg-slate-900 text-white font-semibold py-3 rounded-xl text-xs transition-all">
+                            확인 완료
+                        </button>
+                    </div>
+                </div>
+            `;
+
+            modal.classList.remove('hidden');
+        }
+
+        function closeDetailModal() {
+            document.getElementById('detailModal').classList.add('hidden');
+        }
+
+        /* ADMIN MODAL ACTIONS */
+        function openAdminModal() {
+            if (!currentUser.isAdmin) {
+                alert("개설자 계정(202630313@eonju.ms.kr)으로 접속했을 때만 접근 가능합니다.");
+                return;
+            }
+            renderAdminAssessmentList();
+            document.getElementById('adminModal').classList.remove('hidden');
+        }
+
+        function closeAdminModal() {
+            document.getElementById('adminModal').classList.add('hidden');
+        }
+
+        function saveAssessment(e) {
+            e.preventDefault();
+            const grade = document.getElementById('formGrade').value;
+            const classNum = document.getElementById('formClass').value;
+            const subject = document.getElementById('formSubject').value;
+            const title = document.getElementById('formTitle').value.trim();
+            const dueDate = document.getElementById('formDueDate').value;
+            const prepTime = document.getElementById('formPrepTime').value.trim();
+            const description = document.getElementById('formDescription').value.trim();
+
+            const newAss = {
+                id: Date.now().toString(),
+                grade,
+                classNum,
+                subject,
+                title,
+                dueDate,
+                prepTime,
+                description
+            };
+
+            assessments.push(newAss);
+            saveAssessmentsToStorage();
+
+            alert("수행평가 일정이 성공적으로 신규 등록되었습니다!");
+
+            // Reset Form fields
+            document.getElementById('formTitle').value = '';
+            document.getElementById('formPrepTime').value = '';
+            document.getElementById('formDescription').value = '';
+
+            renderAdminAssessmentList();
+            renderDashboard();
+        }
+
+        function deleteAssessment(id) {
+            if (confirm("정말로 이 수행평가 일정을 삭제하시겠습니까?")) {
+                assessments = assessments.filter(a => a.id !== id);
+                saveAssessmentsToStorage();
+                renderAdminAssessmentList();
+                renderDashboard();
+            }
+        }
+
+        function renderAdminAssessmentList() {
+            const container = document.getElementById('adminAssessmentList');
+            container.innerHTML = '';
+
+            if (assessments.length === 0) {
+                container.innerHTML = `<p class="text-xs text-slate-400 py-2">등록된 일정이 없습니다.</p>`;
+                return;
+            }
+
+            assessments.forEach(item => {
+                const row = document.createElement('div');
+                row.className = "flex items-center justify-between p-2.5 rounded-xl bg-slate-50 border border-slate-100 text-xs";
+                row.innerHTML = `
+                    <div class="truncate mr-2">
+                        <span class="font-bold text-slate-700">[${item.subject}]</span>
+                        <span class="text-slate-800 ml-1 font-medium">${item.title}</span>
+                        <span class="text-slate-400 text-[11px] block">${item.grade}학년 ${item.classNum === 'all' ? '전체' : item.classNum + '반'} · 마감: ${item.dueDate}</span>
+                    </div>
+                    <button onclick="deleteAssessment('${item.id}')" class="text-rose-500 hover:text-rose-700 shrink-0 p-1 font-semibold">
+                        <i class="fa-regular fa-trash-can"></i> 삭제
+                    </button>
+                `;
+                container.appendChild(row);
+            });
+        }
+
+        function openNotifSettings() {
+            document.getElementById('notifModal').classList.remove('hidden');
+        }
+
+        function closeNotifModal() {
+            document.getElementById('notifModal').classList.add('hidden');
+        }
+
+        function requestNotificationPermission() {
+            if ("Notification" in window) {
+                Notification.requestPermission().then(permission => {
+                    if (permission === "granted") {
+                        showInAppToast("알림 설정 완료!", "수행평가 전날 밤 10시, 당일 오전 8시에 푸시 알림이 발송됩니다.");
+                        dismissBanner();
+                    } else {
+                        alert("브라우저 알림 권한이 거부되었습니다. 브라우저 설정에서 권한을 허용해 주세요.");
+                    }
+                });
+            } else {
+                alert("현재 브라우저는 알림 기능을 지원하지 않습니다.");
+            }
+        }
+
+        function dismissBanner() {
+            const banner = document.getElementById('notifBanner');
+            if (banner) banner.classList.add('hidden');
+        }
+
+        function saveNotifSettings() {
+            const d1 = document.getElementById('toggleNotifD1').checked;
+            const dDay = document.getElementById('toggleNotifDDay').checked;
+            localStorage.setItem('eonju_notif_d1', d1);
+            localStorage.setItem('eonju_notif_dday', dDay);
+        }
+
+        function triggerTestNotification() {
+            if ("Notification" in window && Notification.permission === "granted") {
+                new Notification("[언주중 수행평가 플래너]", {
+                    body: "🔔 [국어 A] 현대 소설 서평 제출 마감 전날입니다! (밤 10시 안내 시뮬레이션)",
+                    icon: "https://cdn-icons-png.flaticon.com/512/2693/2693507.png"
+                });
+            } else {
+                showInAppToast("🔔 알림 테스트 (시뮬레이션)", "[국어 A] 서평 제출 전날 밤 10시 알림: 준비 소요 시간 약 4시간이 필요합니다!");
+            }
+        }
+
+        function showInAppToast(title, body) {
+            const toast = document.createElement('div');
+            toast.className = "fixed bottom-5 right-5 z-50 max-w-sm bg-slate-900 text-white p-4 rounded-2xl shadow-2xl flex items-start space-x-3 border border-slate-700 animate-fade-in";
+            toast.innerHTML = `
+                <div class="text-blue-400 text-xl"><i class="fa-solid fa-bell"></i></div>
+                <div class="flex-1">
+                    <p class="text-xs font-bold text-white">${title}</p>
+                    <p class="text-[11px] text-slate-300 mt-1 leading-normal">${body}</p>
+                </div>
+                <button onclick="this.parentElement.remove()" class="text-slate-400 hover:text-white text-xs">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            `;
+            document.body.appendChild(toast);
+            setTimeout(() => {
+                if (toast) toast.remove();
+            }, 5000);
         }
     </script>
 </body>
